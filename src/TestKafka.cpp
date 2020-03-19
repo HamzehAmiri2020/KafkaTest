@@ -6,6 +6,8 @@
 
 using namespace rapidjson;
 
+std::string getJson();
+
 int producer_1() {
 	std::string errstr;
 	std::string topic_str = "QMalware";
@@ -31,8 +33,10 @@ int producer_1() {
 			exit(1);
 		}
 	}
-
-	RdKafka::ErrorCode resp = producer->produce(topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY, const_cast<char*>("hello worlf"), 11, NULL, NULL);
+	std::string json = getJson();
+	char *jsonFinal = new char[json.length() + 1];
+	std::copy(json.begin(), json.end(), jsonFinal);
+	RdKafka::ErrorCode resp = producer->produce(topic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY, jsonFinal, 11, NULL, NULL);
 
 	delete topic;
 	delete producer;
@@ -40,23 +44,31 @@ int producer_1() {
 	return 0;
 }
 
-int main(int argc, char **argv) {
-//	producer_1();
-// 1. Parse a JSON string into DOM.
-	const char *json = "{\"project\":\"rapidjson\",\"stars\":10}";
+template<typename T>
+T add(T x, T y) {
+	return x + y;
+}
+
+std::string getJson() {
+	char *json = "{\"project\":\"rapidjson\",\"stars\":10}";
 	Document d;
 	d.Parse(json);
 
-// 2. Modify it by DOM.
 	Value &s = d["stars"];
 	s.SetInt(s.GetInt() + 1);
 
-// 3. Stringify the DOM
 	StringBuffer buffer;
 	Writer<StringBuffer> writer(buffer);
 	d.Accept(writer);
 
-// Output {"project":"rapidjson","stars":11}
-	std::cout << buffer.GetString() << std::endl;
+	char *output_json = const_cast<char*>(buffer.GetString());
+	std::string msgJson(output_json);
+	std::cout << msgJson << std::endl;
+	return msgJson;
+}
+
+int main(int argc, char **argv) {
+//	std::cout << add(10,10);
+	producer_1();
 }
 
