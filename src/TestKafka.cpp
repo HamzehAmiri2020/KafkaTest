@@ -141,7 +141,7 @@ T add(T x, T y) {
 }
 
 std::string getJson() {
-	char *json = "{\"project\":\"rapidjson\",\"stars\":10}";
+	char *json = "{\"project\":\"rapidjson\",\"stars\":13}";
 	Document d;
 	d.Parse(json);
 
